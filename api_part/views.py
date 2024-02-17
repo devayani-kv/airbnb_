@@ -54,6 +54,7 @@ def scrape_data(url):
                 catering.append(i.get_attribute('innerHTML')) 
         lst.append(catering)
         #print(catering)
+
         #rating and num of reviews
         rating_review_obj = driver.find_elements(By.XPATH, "//*[@class='a8jt5op atm_3f_idpfg4 atm_7h_hxbz6r atm_7i_ysn8ba atm_e2_t94yts atm_ks_zryt35 atm_l8_idpfg4 atm_mk_stnw88 atm_vv_1q9ccgz atm_vy_t94yts dir dir-ltr']") 
         rating = ''
@@ -66,11 +67,17 @@ def scrape_data(url):
                 s = i.get_attribute('innerHTML')
             ss = s.split()
             #print(ss)
-            if rating == '' and 'Rated' in ss:
+            if rating == '' and ('Rated' in ss) or ('Rating' in ss):
                 rating = s
                 #print(rating)
-            if review == '' and 'reviews' in ss:
+            if review == '' and ('reviews' in ss) or ('Reviews' in ss):
                 review = s
+        #print(rating + ' ' + review)
+        #print(review)
+
+        #rating_obj = driver.find_element(By.XPATH, "//*[contains(text(),'rating')]")
+        #eview_obj = driver.find_element(By.XPATH, "//*[contains(text(),'review')]")
+        
         lst.append(rating)
         lst.append(review)
         #print(rating)
@@ -86,7 +93,8 @@ def scrape_data(url):
         lst.append(host_name)   
 
         #price
-        price_obj = driver.find_element(By.CLASS_NAME, '_tyxjp1')
+        price_obj = driver.find_element(By.XPATH, "//*[contains(text(),'₹')]")
+        #price_obj = driver.find_element(By.CLASS_NAME, '_tyxjp1')
         price = ''
         if price_obj.text != '':
             price = price_obj.text
@@ -95,18 +103,19 @@ def scrape_data(url):
         lst.append(price)
         #print(price)
 
-        #description 
+        #description lrl13de atm_kd_pg2kvz_1bqn0at dir dir-ltr
         a = driver.find_elements(By.XPATH, "//*[@class='lrl13de atm_kd_pg2kvz_1bqn0at dir dir-ltr']")
         desc = ''
         for i in a:
             desc += i.text
-            if desc == '':
+            dd = i.text 
+            if dd == '':
                 for i in a:
                     desc += i.get_attribute('innerHTML')
         lst.append(desc)
         #print(desc)
         info_ab_house = ''
-        
+        driver.close()
         return lst
     except ValueError as e:
         return Response(e.args[0], status.HTTP_400_BAD_REQUEST) 
@@ -124,8 +133,8 @@ def cxcon(request):
                 info_ab_house += i + ' '
             messages.success(request, 'Property Name : {}'.format(BeautifulSoup(ans[0], "lxml").text))
             messages.success(request, 'Info about the property : {}'.format(BeautifulSoup(info_ab_house, "lxml").text))
-            messages.success(request, 'Rating : {}'.format(BeautifulSoup(ans[2], "lxml").text))
-            messages.success(request, 'Reviews : {}'.format(BeautifulSoup(ans[3], "lxml").text))
+            messages.success(request, 'Rating and Reviews: {}'.format((BeautifulSoup(ans[2], "lxml").text) + ' ' + (BeautifulSoup(ans[3], "lxml").text)))
+            #messages.success(request, 'Reviews : {}'.format(BeautifulSoup(ans[3], "lxml").text))
             messages.success(request, 'Host Name : {}'.format(BeautifulSoup(ans[4], "lxml").text))
             messages.success(request, 'Price : {}'.format(BeautifulSoup(ans[5], "lxml").text))
             messages.success(request, 'Description : {}'.format(BeautifulSoup(ans[6], "lxml").text))
